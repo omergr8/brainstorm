@@ -1,0 +1,33 @@
+.recordButton {
+  width: 60px;
+  height: 60px;
+  background-color: #1876d1;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.recording {
+  background-color: #f44336;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.recordButton:hover,
+.recording:hover {
+  opacity: 0.8;
+}
+
+.icon {
+  color: white;
+  font-size: 30px;
+}

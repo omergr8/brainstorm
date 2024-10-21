@@ -2,3 +2,17 @@
   width: 90%;
   margin: auto;
 }
+/* App.css */
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto; /* Ensures footer sticks to bottom */
+}
