@@ -26,6 +26,9 @@ const SessionSummary = () => {
 
   return (
     <div className={classes.container}>
+       <Typography variant="h5" sx={{fontWeight:'600'}} gutterBottom>
+          Summary
+        </Typography>
       <Card className={classes.card}>
         <CardContent>
           <Typography variant="h5" gutterBottom>

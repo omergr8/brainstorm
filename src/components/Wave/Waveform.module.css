@@ -1,0 +1,28 @@
+/* Waveform.module.css */
+.waveformContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100px;
+    overflow: hidden;
+    padding: 0 5px; /* Adjust padding if needed */
+  }
+  
+  .bar {
+    width: 100%;
+    border-radius: 10px; /* Optional for rounding */
+    animation: pulse 0.5s ease-in-out infinite alternate; /* Optional animation */
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scaleY(1);
+    }
+    50% {
+      transform: scaleY(1.1);
+    }
+    100% {
+      transform: scaleY(1);
+    }
+  }
+  

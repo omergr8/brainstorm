@@ -1,0 +1,45 @@
+.header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voteSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select {
+  margin-bottom: 16px;
+  align-self: flex-start;
+}
+
+.card {
+  background-color: #f0f1ff;
+  border-radius: 10px;
+  padding: 10px 0;
+  width: 400px;
+  flex: 0 0 auto; /* Prevent the card from shrinking or growing */
+}
+.ideaSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cardsCarousel {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto; /* Enables horizontal scrolling */
+  scroll-behavior: smooth; /* Smooth scrolling effect */
+  padding: 10px; /* Optional padding around the carousel */
+}
+
+.cardsCarousel::-webkit-scrollbar {
+  display: none; /* Hide the scrollbar for a cleaner look on WebKit browsers */
+}
+
+.cardsCarousel {
+  -ms-overflow-style: none; /* Hide scrollbar on IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar on Firefox */
+}

@@ -16,3 +16,6 @@
 footer {
   margin-top: auto; /* Ensures footer sticks to bottom */
 }
+.w-100{
+  width: 100%;
+}

@@ -1,16 +1,131 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useMicVAD } from "@ricky0123/vad-react";
 import RecordButton from "../../components/RecordButton";
+import { Button, Divider } from "@mui/material";
+import { Typography } from "@mui/material";
+import HeroSection from "../../components/HeroSection";
 import LiveTranscript from "../../components/LiveTranscript";
-import IdeaSuggestions from "../../components/IdeaSuggestions";
+import Suggestions from "../../components/Suggestions";
 import SessionSummary from "../../components/SessionSummary";
+import Idea from "../../components/Idea";
+import { float32ToPCM } from "../../helper/helper";
 import classes from "./Home.module.css";
+import Waveform from "../../components/Wave";
 
 const Home = () => {
-  const [isSessionStarted, setIsSessionStarted] = useState(false);
+  const websocketRef = useRef(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [transcription, setTranscription] = useState("");
+  const [intensity, setIntensity] = useState(0);
 
-  const handleRecordClick = () => {
-    setIsSessionStarted(!isSessionStarted);
+  // Set up the VAD
+  const vad = useMicVAD({
+    startOnLoad: false, // Disable automatic start
+    onSpeechStart: () => {
+      console.log("User started talking");
+    },
+    onFrameProcessed: (probabilities) => {
+      const { isSpeech } = probabilities;
+      // You can scale the isSpeech value to get an intensity level
+      setIntensity(isSpeech);
+    },
+    onSpeechEnd: (audio) => {
+      // Only send audio if connected and VAD is enabled
+      if (isConnected && websocketRef.current) {
+        const pcmAudioBuffer = float32ToPCM(audio);
+
+        // Send the PCM audio buffer to the server
+        const blob = new Blob([pcmAudioBuffer], { type: "audio/wav" });
+        const reader = new FileReader();
+        reader.onload = () => {
+          const arrayBuffer = reader.result;
+          // Send arrayBuffer to your backend WebSocket
+          websocketRef.current.send(arrayBuffer);
+        };
+        reader.readAsArrayBuffer(blob);
+      } else {
+        console.log("WebSocket is not connected.");
+      }
+    },
+    onVADMisfire: () => {
+      console.log("Speech misfire detected (too short)");
+    },
+  });
+
+  const handleConnectSession = () => {
+    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/api/audio");
+
+    websocketRef.current.onopen = () => {
+      console.log("WebSocket connected");
+      setIsConnected(true); // Update state to indicate connection
+    };
+
+    websocketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+
+      // Check if the message type is 'response.done'
+      if (data.type === "response.done") {
+        // Handle success responses
+        if (data.response) {
+          const { output } = data.response;
+
+          // Ensure output is not empty and has content
+          if (output && output.length > 0 && output[0].content) {
+            const content = output[0].content[0]; // Accessing the first content block
+
+            // Check if the content contains audio transcript or text
+            if (content.type === "audio" && content.transcript) {
+              // It's an audio response, append the transcript
+              setTranscription((prev) => prev + " " + content.transcript);
+            } else if (content.type === "text" && content.text) {
+              // It's a text response, append the text
+              setTranscription((prev) => prev + " " + content.text);
+            }
+          } else {
+            console.warn("Output is empty or does not contain content.");
+          }
+        } else {
+          console.error("Response is undefined.");
+        }
+      } else if (data.response && data.response.status === "failed") {
+        // Handle failed response
+        console.error("Response failed:", data.response.status_details.message);
+        // You may also want to handle the error accordingly in your UI
+      }
+    };
+
+    websocketRef.current.onerror = (event) => {
+      console.error("WebSocket error:", event);
+    };
+
+    websocketRef.current.onclose = () => {
+      console.log("WebSocket closed");
+      setIsConnected(false); // Update state when closed
+    };
   };
+  const disconnectWebSocket = () => {
+    if (websocketRef.current) {
+      websocketRef.current.close(); // Close WebSocket connection
+    }
+  };
+
+  // Effect to manage VAD start/stop based on connection state
+  useEffect(() => {
+    if (isConnected) {
+      vad.start(); // Start VAD if connected
+    } else {
+      vad.pause(); // Stop VAD if not connected
+    }
+  }, [isConnected, vad]); // Dependencies to monitor changes
+
+  useEffect(() => {
+    return () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+  }, []);
   return (
     <div className={classes.main}>
       <div className="container">
@@ -22,21 +137,67 @@ const Home = () => {
             />
           </div>
         </div> */}
-        {isSessionStarted && (
+        {isConnected ? (
           <div>
-            <div>
-              <LiveTranscript />
+            <div className={classes.disconnectBox}>
+              <Typography
+                variant="h5"
+                gutterBottom
+                sx={{ textAlign: "center", fontWeight: "600" }}
+              >
+                Session Dashboard
+              </Typography>
+              <div>
+                <Waveform intensity={intensity} />
+                {/* {vad.loading
+                  ? "Loading..."
+                  : vad.userSpeaking
+                  ? "User is speaking"
+                  : "User is silent"} */}
+              </div>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={disconnectWebSocket}
+              >
+                End Session
+              </Button>
             </div>
+            <Divider />
+            {vad.errored && <p>Error: {vad.errored.message}</p>}
             <div className={classes.box}>
-            <div className={classes.IdeaSuggestions}>
-              <IdeaSuggestions />
+              <div className={classes.IdeaSuggestions}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ textAlign: "center", fontWeight: "600" }}
+                >
+                  Live Transcript
+                </Typography>
+                <LiveTranscript transcript={transcription} />
+              </div>
+              <div className={classes.IdeaSuggestions}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ textAlign: "center", fontWeight: "600" }}
+                >
+                  AI Suggestion
+                </Typography>
+                <Suggestions />
+              </div>
             </div>
-            <div className={classes.SessionSummary}>
-              <SessionSummary />
+            <div className={classes.commonBox}>
+              <Idea />
             </div>
+            <div className={classes.commonBox}>
+              <div className={classes.SessionSummary}>
+                <SessionSummary />
+              </div>
             </div>
-           
           </div>
+        ) : (
+          <HeroSection handleConnect={handleConnectSession} />
         )}
       </div>
     </div>
