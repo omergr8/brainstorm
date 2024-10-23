@@ -61,37 +61,20 @@ const Home = () => {
     };
 
     websocketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data);
+      const output = JSON.parse(event.data);
+      console.log('output')
+      console.log(output);
 
-      // Check if the message type is 'response.done'
-      if (data.type === "response.done") {
-        // Handle success responses
-        if (data.response) {
-          const { output } = data.response;
-
-          // Ensure output is not empty and has content
-          if (output && output.length > 0 && output[0].content) {
-            const content = output[0].content[0]; // Accessing the first content block
-
-            // Check if the content contains audio transcript or text
-            if (content.type === "audio" && content.transcript) {
-              // It's an audio response, append the transcript
-              setTranscription((prev) => prev + " " + content.transcript);
-            } else if (content.type === "text" && content.text) {
-              // It's a text response, append the text
-              setTranscription((prev) => prev + " " + content.text);
-            }
-          } else {
-            console.warn("Output is empty or does not contain content.");
-          }
-        } else {
-          console.error("Response is undefined.");
+      if (output && output.status === "success")  {
+        if ( output.type === "transcription") {
+          setTranscription((prev) => prev + " " + output.text);
+        } else if (output.type === "titles") {
+          console.log(output.titles)
+        } else if (output.type === "summary") {
+          console.log("Summary:", output.text);
+        } else if (output.type === "ideas") {
+          console.log("Ideas:", output.ideas);
         }
-      } else if (data.response && data.response.status === "failed") {
-        // Handle failed response
-        console.error("Response failed:", data.response.status_details.message);
-        // You may also want to handle the error accordingly in your UI
       }
     };
 
