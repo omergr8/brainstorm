@@ -155,7 +155,7 @@ const Home = () => {
             />
           </div>
         </div> */}
-        {!isConnected ? (
+        {isConnected ? (
           <div>
             <div className={classes.disconnectBox}>
               <Typography
