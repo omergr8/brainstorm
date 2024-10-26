@@ -19,3 +19,13 @@ footer {
 .w-100{
   width: 100%;
 }
+
+.text-center{
+text-align: center;
+}
+.mt-10{
+  margin-top: 10px;
+}
+.mb-10{
+  margin-bottom: 10px;
+}

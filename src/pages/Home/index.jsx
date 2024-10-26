@@ -16,7 +16,18 @@ const Home = () => {
   const websocketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [transcription, setTranscription] = useState("");
+  const [analysis, setAnalysis] = useState({ titles: [], suggestions: [] });
+  const [summary, setSummary] = useState("");
   const [intensity, setIntensity] = useState(0);
+
+  const isValidJSON = (data) => {
+    try {
+      JSON.parse(data);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
 
   // Set up the VAD
   const vad = useMicVAD({
@@ -53,7 +64,11 @@ const Home = () => {
   });
 
   const handleConnectSession = () => {
-    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/api/audio");
+    const accessToken = localStorage.getItem("accessToken");
+
+    websocketRef.current = new WebSocket(
+      `ws://127.0.0.1:8000/api/audio?token=${accessToken}`
+    );
 
     websocketRef.current.onopen = () => {
       console.log("WebSocket connected");
@@ -61,20 +76,36 @@ const Home = () => {
     };
 
     websocketRef.current.onmessage = (event) => {
-      const output = JSON.parse(event.data);
-      console.log('output')
-      console.log(output);
+      console.log(event, event.data);
 
-      if (output && output.status === "success")  {
-        if ( output.type === "transcription") {
-          setTranscription((prev) => prev + " " + output.text);
-        } else if (output.type === "titles") {
-          console.log(output.titles)
-        } else if (output.type === "summary") {
-          console.log("Summary:", output.text);
-        } else if (output.type === "ideas") {
-          console.log("Ideas:", output.ideas);
+      // Check if event.data is valid JSON
+      if (isValidJSON(event.data)) {
+        const output = JSON.parse(event.data);
+        console.log("output:", output);
+
+        if (output && output.status === "success") {
+          if (output.type === "transcription") {
+            setTranscription((prev) => prev + " " + output.text);
+          } else if (output.type === "analysis" && output.output) {
+            setAnalysis((prevAnalysis) => ({
+              titles: [...prevAnalysis.titles, ...output.output.titles],
+              suggestions: [
+                ...prevAnalysis.suggestions,
+                ...output.output.suggestions,
+              ],
+            }));
+          }
+          //  else if (output.type === "titles") {
+          //   console.log("Titles:", output.titles);
+          // } else if (output.type === "summary") {
+          //   console.log("Summary:", output.text);
+          // } else if (output.type === "ideas") {
+          //   console.log("Ideas:", output.ideas);
+          // }
         }
+      } else {
+        // Handle non-JSON responses, e.g., errors or plain text messages
+        console.log("Received non-JSON message:", event.data);
       }
     };
 
@@ -109,6 +140,10 @@ const Home = () => {
       }
     };
   }, []);
+
+  const handleSummary = () => {
+    console.log("api call for summary");
+  };
   return (
     <div className={classes.main}>
       <div className="container">
@@ -120,7 +155,7 @@ const Home = () => {
             />
           </div>
         </div> */}
-        {isConnected ? (
+        {!isConnected ? (
           <div>
             <div className={classes.disconnectBox}>
               <Typography
@@ -167,15 +202,18 @@ const Home = () => {
                 >
                   AI Suggestion
                 </Typography>
-                <Suggestions />
+                <Suggestions data={analysis.suggestions} />
               </div>
             </div>
             <div className={classes.commonBox}>
-              <Idea />
+              <Idea data={analysis.titles} />
+            </div>
+            <div className="text-center mt-10 mb-10">
+              <Button onClick={handleSummary} variant="contained">Generate Summary</Button>
             </div>
             <div className={classes.commonBox}>
               <div className={classes.SessionSummary}>
-                <SessionSummary />
+                <SessionSummary data={summary}/>
               </div>
             </div>
           </div>

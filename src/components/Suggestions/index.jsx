@@ -1,5 +1,12 @@
 import React from "react";
-import { Card, CardContent, List, ListItem, ListItemText } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 
 import classes from "./Suggestions.module.css"; // Assume we have a modular CSS setup
 
@@ -28,7 +35,7 @@ const mockData = [
   },
 ];
 
-const Suggestions = () => {
+const Suggestions = ({ data }) => {
   // Flattening all suggestions into one array
   const allSuggestions = mockData.flatMap((data) => data.suggestions);
 
@@ -37,11 +44,22 @@ const Suggestions = () => {
       <div className={classes.box}>
         <div className="container">
           <List>
-            {allSuggestions.map((suggestion, idx) => (
+            {data && data.length > 0 ? (
+              data.map((suggestion, idx) => (
+                <ListItem key={idx} disablePadding>
+                  <ListItemText primary={`${idx + 1}. ${suggestion}`} />
+                </ListItem>
+              ))
+            ) : (
+              <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                Waiting for suggestion...
+              </Typography>
+            )}
+            {/* {allSuggestions.map((suggestion, idx) => (
               <ListItem key={idx} disablePadding>
                 <ListItemText primary={`${idx + 1}. ${suggestion}`} />
               </ListItem>
-            ))}
+            ))} */}
           </List>
         </div>
       </div>

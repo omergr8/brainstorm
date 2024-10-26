@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -47,9 +47,17 @@ const mockData = [
   },
 ];
 
-const Idea = () => {
-  const [ideas, setIdeas] = useState(mockData);
+const Idea = ({ data = [] }) => {
+  const [ideas, setIdeas] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(()=>{
+    if (data.length>0){
+      setIdeas(data)
+    }
+    console.log("test", data)
+  },[data])
+
 
   const handleVote = (index, type) => {
     const updatedIdeas = [...ideas];
@@ -65,6 +73,11 @@ const Idea = () => {
     setSelectedCategory(event.target.value);
   };
 
+  const categories = [
+    "All",
+    ...new Set(data.map((item) => item.category).filter(Boolean)),
+  ];
+
   const filteredIdeas =
     selectedCategory === "All"
       ? ideas
@@ -73,7 +86,7 @@ const Idea = () => {
   return (
     <div className={classes.container}>
       <div className={classes.header}>
-        <Typography variant="h5" sx={{fontWeight:'600'}} gutterBottom>
+        <Typography variant="h5" sx={{ fontWeight: "600" }} gutterBottom>
           Idea Organization
         </Typography>
         <Select
@@ -81,23 +94,25 @@ const Idea = () => {
           onChange={handleCategoryChange}
           className={classes.select}
         >
-          <MenuItem value="All">All Categories</MenuItem>
-          <MenuItem value="UX">UX</MenuItem>
-          <MenuItem value="Features">Features</MenuItem>
-          <MenuItem value="AI">AI</MenuItem>
+          {categories.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
+            </MenuItem>
+          ))}
         </Select>
       </div>
       <div className={classes.cardsCarousel}>
-        {filteredIdeas.map((data, index) => (
-          <div className={classes.card} key={index}>
-            <div className="container">
-              <div className={classes.content}>
-                <h2 className={classes.heading}>{data.category}</h2>
-                <div className={classes.ideaSection}>
-                  <Typography variant="p" sx={{ fontWeight: "500" }}>
-                    {data.idea}
-                  </Typography>
-                  <div className={classes.voteSection}>
+        {ideas && ideas.length > 0 ? (
+          filteredIdeas.map((data, index) => (
+            <div className={classes.card} key={index}>
+              <div className="container">
+                <div className={classes.content}>
+                  <h2 className={classes.heading}>{data.title}</h2>
+                  <div className={classes.ideaSection}>
+                    <Typography variant="p" sx={{ fontWeight: "500" }}>
+                      {data.idea}
+                    </Typography>
+                    {/* <div className={classes.voteSection}>
                     <IconButton onClick={() => handleVote(0, "upvote")}>
                       <ThumbUpIcon />
                     </IconButton>
@@ -105,12 +120,17 @@ const Idea = () => {
                     <IconButton onClick={() => handleVote(1, "downvote")}>
                       <ThumbDownIcon />
                     </IconButton>
+                  </div> */}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+            Waiting for Ideas...
+          </Typography>
+        )}
       </div>
     </div>
   );
