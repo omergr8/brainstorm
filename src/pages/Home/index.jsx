@@ -53,7 +53,7 @@ const Home = () => {
   });
 
   const handleConnectSession = () => {
-    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/api/audio?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXVkYWhtZWQxNjMyQGdtYWlsLmNvbSIsImV4cCI6MTcyOTc4MDM1MH0.VlMw4a7LHc_kduB7kgrk-IMaV8fY2R-NQgVaZvrjZ1s");
+    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/api/audio?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYXVkYWhtZWQxNjMyQGdtYWlsLmNvbSIsImV4cCI6MTcyOTkyNDEzMn0.VQ6REN92Nlip8Vxo9mQ9WcLcyqQLx9pIQXz875I9u0s");
 
     websocketRef.current.onopen = () => {
       console.log("WebSocket connected");

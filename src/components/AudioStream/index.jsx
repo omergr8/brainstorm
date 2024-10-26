@@ -16,70 +16,13 @@ const AudioStream = () => {
     return pcmArray;
   }
 
-  function createWavFile(audioData, sampleRate) {
-    const numChannels = 1; // Mono
-    const bitsPerSample = 16;
-    const blockAlign = (numChannels * bitsPerSample) / 8;
-    const byteRate = sampleRate * blockAlign;
-
-    // Create the WAV header
-    const headerBuffer = new ArrayBuffer(44);
-    const headerView = new DataView(headerBuffer);
-
-    // Write the WAV header
-    // "RIFF" chunk descriptor
-    headerView.setUint8(0, "R".charCodeAt(0));
-    headerView.setUint8(1, "I".charCodeAt(0));
-    headerView.setUint8(2, "F".charCodeAt(0));
-    headerView.setUint8(3, "F".charCodeAt(0));
-
-    // ChunkSize: 36 + SubChunk2Size
-    const fileSize = 36 + audioData.byteLength;
-    headerView.setUint32(4, fileSize, true);
-
-    // "WAVE" format
-    headerView.setUint8(8, "W".charCodeAt(0));
-    headerView.setUint8(9, "A".charCodeAt(0));
-    headerView.setUint8(10, "V".charCodeAt(0));
-    headerView.setUint8(11, "E".charCodeAt(0));
-
-    // "fmt " subchunk
-    headerView.setUint8(12, "f".charCodeAt(0));
-    headerView.setUint8(13, "m".charCodeAt(0));
-    headerView.setUint8(14, "t".charCodeAt(0));
-    headerView.setUint8(15, " ".charCodeAt(0));
-
-    // Subchunk1Size: 16 for PCM
-    headerView.setUint32(16, 16, true);
-    // AudioFormat: 1 for PCM
-    headerView.setUint16(20, 1, true);
-    // NumChannels: 1 for mono
-    headerView.setUint16(22, numChannels, true);
-    // SampleRate
-    headerView.setUint32(24, sampleRate, true);
-    // ByteRate: SampleRate * NumChannels * BitsPerSample/8
-    headerView.setUint32(28, byteRate, true);
-    // BlockAlign: NumChannels * BitsPerSample/8
-    headerView.setUint16(32, blockAlign, true);
-    // BitsPerSample
-    headerView.setUint16(34, bitsPerSample, true);
-
-    // "data" subchunk
-    headerView.setUint8(36, "d".charCodeAt(0));
-    headerView.setUint8(37, "a".charCodeAt(0));
-    headerView.setUint8(38, "t".charCodeAt(0));
-    headerView.setUint8(39, "a".charCodeAt(0));
-
-    // Subchunk2Size: NumSamples * NumChannels * BitsPerSample/8
-    headerView.setUint32(40, audioData.byteLength, true);
-
-    // Create the final buffer by concatenating the header and audio data
-    const wavBuffer = new Uint8Array(headerBuffer.byteLength + audioData.byteLength);
-    wavBuffer.set(new Uint8Array(headerBuffer), 0);
-    wavBuffer.set(new Uint8Array(audioData.buffer), headerBuffer.byteLength);
-
+  function createWavFile(audioData) {  
+    // Merge the header and audio data into a single buffer
+    const wavBuffer = new Uint8Array(audioData.byteLength);
+    wavBuffer.set(new Uint8Array(audioData.buffer), 0);
     return wavBuffer.buffer;
   }
+  
 
   const vad = useMicVAD({
     startOnLoad: false,
@@ -91,7 +34,7 @@ const AudioStream = () => {
         try {
           console.log("Processing audio data:", audio.length);
           const pcmData = float32ToPCM(audio);
-          const wavBuffer = createWavFile(pcmData, 16000);
+          const wavBuffer = createWavFile(pcmData);
           console.log("WAV buffer size:", wavBuffer.byteLength);
           websocketRef.current.send(wavBuffer);
         } catch (error) {
