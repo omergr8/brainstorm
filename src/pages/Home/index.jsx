@@ -11,11 +11,13 @@ import Idea from "../../components/Idea";
 import { float32ToPCM } from "../../helper/helper";
 import classes from "./Home.module.css";
 import Waveform from "../../components/Wave";
+import { useAuth } from "../../context/AuthContext";
 
 const Home = () => {
   const websocketRef = useRef(null);
+  const { logout } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
-  const [transcription, setTranscription] = useState("");
+  const [transcription, setTranscription] = useState([]);
   const [analysis, setAnalysis] = useState({ titles: [], suggestions: [] });
   const [summary, setSummary] = useState("");
   const [intensity, setIntensity] = useState(0);
@@ -82,10 +84,16 @@ const Home = () => {
       if (isValidJSON(event.data)) {
         const output = JSON.parse(event.data);
         console.log("output:", output);
+        if (output.msg === "Authentication required: An error occurred.") {
+          logout();
+        }
 
         if (output && output.status === "success") {
           if (output.type === "transcription") {
-            setTranscription((prev) => prev + " " + output.text);
+            setTranscription((prev) => [
+              ...prev,
+              { text: output.text, user: output.user },
+            ]);
           } else if (output.type === "analysis" && output.output) {
             setAnalysis((prevAnalysis) => ({
               titles: [...prevAnalysis.titles, ...output.output.titles],
@@ -113,8 +121,8 @@ const Home = () => {
       console.error("WebSocket error:", event);
     };
 
-    websocketRef.current.onclose = () => {
-      console.log("WebSocket closed");
+    websocketRef.current.onclose = (event) => {
+      console.log("WebSocket closed", event);
       setIsConnected(false); // Update state when closed
     };
   };
@@ -209,11 +217,13 @@ const Home = () => {
               <Idea data={analysis.titles} />
             </div>
             <div className="text-center mt-10 mb-10">
-              <Button onClick={handleSummary} variant="contained">Generate Summary</Button>
+              <Button onClick={handleSummary} variant="contained">
+                Generate Summary
+              </Button>
             </div>
             <div className={classes.commonBox}>
               <div className={classes.SessionSummary}>
-                <SessionSummary data={summary}/>
+                <SessionSummary data={summary} />
               </div>
             </div>
           </div>
