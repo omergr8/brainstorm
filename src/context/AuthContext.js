@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { loginApi, signupApi } from '../api/authApi';
+import { loginApi, signupApi, tokenVerifyApi } from '../api/authApi';
 import { useNavigate } from 'react-router-dom';
+import toaster from '../components/Toast/Toast';
 
 const AuthContext = createContext();
 
@@ -10,13 +11,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Function to check if the token is valid
+  const verifyToken = async (token) => {
+    try {
+      await tokenVerifyApi(token); // Call the API to verify the token
+      setIsAuthenticated(true);
+    } catch (error) {
+      toaster.error("Token verification failed:")
+      console.error("Token verification failed:", error);
+      logout(); // Logout if token verification fails
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
-      setIsAuthenticated(true);
-      // Load user data if needed (use another API to fetch profile)
+      verifyToken(accessToken); // Verify token on initial load
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
@@ -28,6 +43,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       navigate('/'); 
     } catch (error) {
+      toaster.error(`Login Error: ${error}`)
       throw error;
     } finally {
       setLoading(false);
@@ -37,9 +53,10 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     setLoading(true);
     try {
-      const data = await signupApi(userData);
+      await signupApi(userData);
       navigate('/signin');
     } catch (error) {
+      toaster.error(`Signup Error: ${error}`)
       throw error;
     } finally {
       setLoading(false);

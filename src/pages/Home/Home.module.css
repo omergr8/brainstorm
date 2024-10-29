@@ -1,53 +1,86 @@
-.main{
-    padding-bottom: 100px;
+.main {
+  padding-bottom: 100px;
+  position: relative;
 }
 .footer {
-    width: 95%;
-    position: fixed; /* Use fixed to make sure it's always at the bottom */
-    bottom: 80px;
-    left: 50%; /* Center the footer horizontally */
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    z-index: 1000; /* Ensure the footer stays above other content */
-  }
-  .disconnectBox{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 25px;
-    margin-bottom: 25px;
-  }
-.box{
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
-    margin-top: 25px;
+  width: 95%;
+  position: fixed; /* Use fixed to make sure it's always at the bottom */
+  bottom: 80px;
+  left: 50%; /* Center the footer horizontally */
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 1000; /* Ensure the footer stays above other content */
 }
-.IdeaSuggestions{
-    /* height: 250px;
+.disconnectBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+.box {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 80px !important;
+  margin-bottom: 25px;
+  margin-top: 25px;
+}
+.IdeaSuggestions {
+  /* height: 250px;
     overflow-x: auto; */
-    width: 100%;
+  width: 100%;
 }
-.SessionSummary{
-    /* height: 250px;
+.SessionSummary {
+  /* height: 250px;
     overflow-x: auto;
     width: 100%; */
 }
-.commonBox{
-    border: 1px solid #EFEFEF;
-    border-radius: 10px;
-    padding: 15px 10px;
-    width: 100%;
-    margin-bottom: 25px;
+.commonBox {
+  border: 1px solid #efefef;
+  border-radius: 10px;
+  padding: 15px 10px;
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.playerContainer {
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  transition: bottom 0.5s ease;
+}
+
+.hide {
+  bottom: -120px;
+}
+
+.show {
+  bottom: 0;
+}
+
+.toggleButtonContainer {
+  position: absolute;
+  right: 10px;
+  top: -25px;
+}
+
+.toggleButton {
+    background-color: black;
+    cursor: pointer;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
 }
 
 @media (max-width: 768px) {
-    .box{
-        flex-wrap: wrap;
-    }
+  .box {
+    flex-wrap: wrap;
+  }
 }

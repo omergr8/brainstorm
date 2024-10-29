@@ -51,13 +51,12 @@ const Idea = ({ data = [] }) => {
   const [ideas, setIdeas] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  useEffect(()=>{
-    if (data.length>0){
-      setIdeas(data)
+  useEffect(() => {
+    if (data.length > 0) {
+      setIdeas(data);
     }
-    console.log("test", data)
-  },[data])
-
+    console.log("test", data);
+  }, [data]);
 
   const handleVote = (index, type) => {
     const updatedIdeas = [...ideas];
@@ -109,9 +108,11 @@ const Idea = ({ data = [] }) => {
                 <div className={classes.content}>
                   <h2 className={classes.heading}>{data.title}</h2>
                   <div className={classes.ideaSection}>
-                    <Typography variant="p" sx={{ fontWeight: "500" }}>
-                      {data.idea}
-                    </Typography>
+                    {data.ideas &&
+                      data.ideas.length > 0 &&
+                      data.ideas.map((idea, index) => (
+                        <li key={index}>{idea}</li>
+                      ))}
                     {/* <div className={classes.voteSection}>
                     <IconButton onClick={() => handleVote(0, "upvote")}>
                       <ThumbUpIcon />

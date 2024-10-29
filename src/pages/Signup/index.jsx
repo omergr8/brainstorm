@@ -237,7 +237,7 @@ const SignUp = () => {
               </Button>
               <Typography sx={{ textAlign: "center" }}>
                 Already have an account?{" "}
-                <span>
+                {/* <span>
                   <Link
                     href="/material-ui/getting-started/templates/sign-in/"
                     variant="body2"
@@ -245,7 +245,7 @@ const SignUp = () => {
                   >
                     Sign in
                   </Link>
-                </span>
+                </span> */}
               </Typography>
             </Box>
           </Card>

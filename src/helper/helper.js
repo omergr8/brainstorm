@@ -6,3 +6,12 @@ export function float32ToPCM(float32Array) {
   }
   return pcmArray.buffer; // Return ArrayBuffer
 }
+
+export const isValidJSON = (data) => {
+  try {
+    JSON.parse(data);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};

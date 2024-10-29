@@ -91,7 +91,6 @@ const SignIn =(props)=> {
     } catch (error) {
       // Handle error returned from login function
       console.error("Login failed:", error);
-      alert(error.message || "Login failed. Please try again.");
     }
   };
 

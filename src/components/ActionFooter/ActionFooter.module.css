@@ -1,0 +1,14 @@
+.main {
+  border-top-left-radius: 0.5rem; /* rounded-tl-lg */
+  border-top-right-radius: 0.5rem; /* rounded-tr-lg */
+  width: 100%; /* w-full */
+  color: white; /* text-black */
+  background-color: #000000ec; /* bg-[#211749] */
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

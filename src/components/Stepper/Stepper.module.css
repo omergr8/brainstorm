@@ -1,0 +1,26 @@
+.meetingMain {
+}
+.mainHeading {
+  font-size: 30px;
+  font-weight: 500;
+}
+.secondaryHeading {
+  font-size: 30px;
+  font-weight: 500;
+}
+.helperText {
+  font-size: 20px;
+  font-style: italic;
+}
+.nextContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* Adjust based on your desired spacing */
+  margin-top: 1.25rem; /* This is equivalent to mt-5 in Tailwind (20px) */
+}
+.box{
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}

@@ -18,3 +18,8 @@ export const signupApi = async (data) => {
   const response = await axiosInstance.post("/signup/", data);
   return response.data;
 };
+
+export const tokenVerifyApi = async (token) => {
+  const response = await axiosInstance.get(`/token/verify?token=${token}`);
+  return response.data;
+};
