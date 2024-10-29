@@ -49,8 +49,19 @@ const Home = () => {
         const reader = new FileReader();
         reader.onload = () => {
           const arrayBuffer = reader.result;
-          // Send arrayBuffer to your backend WebSocket
-          websocketRef.current.send(arrayBuffer);
+          const base64Data = btoa(
+            new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+          );
+
+           // Construct the JSON object
+          const payload = {
+            meetingId: localStorage.getItem("meetingId"), 
+            data: base64Data,
+            type: "audio"
+          };
+
+          // Send the payload as a JSON string
+          websocketRef.current.send(JSON.stringify(payload));
         };
         reader.readAsArrayBuffer(blob);
       } else {
