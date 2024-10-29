@@ -4,7 +4,7 @@ export const uploadDocumentApi = async (file, meetingId) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("meetingId", meetingId);
+    formData.append("meeting_id", meetingId);
     // Send POST request to upload file
     const response = await axiosInstance.post("/upload/", formData, {
       headers: {

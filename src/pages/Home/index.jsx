@@ -167,12 +167,13 @@ const Home = () => {
       websocketRef.current &&
       websocketRef.current.readyState === WebSocket.OPEN
     ) {
-      // const endMeetingMessage = JSON.stringify({
-      //     type: "end_meeting",
-      //     meetingId: localStorage.getItem("meetingId"),
-      // });
-      // websocketRef.current.send(endMeetingMessage);
-      // console.log("End meeting message sent");
+
+      const endMeetingMessage = JSON.stringify({
+          type: "end_meeting",
+          meetingId: localStorage.getItem("meetingId"),
+      });
+      websocketRef.current.send(endMeetingMessage);
+      console.log("End meeting message sent");
     }
   };
 
