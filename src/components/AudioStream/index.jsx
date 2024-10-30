@@ -53,7 +53,7 @@ const AudioStream = () => {
       return;
     }
 
-    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/api/audio");
+    websocketRef.current = new WebSocket("ws://127.0.0.1:8000/ws/audio");
 
     websocketRef.current.onopen = () => {
       console.log("WebSocket connected");

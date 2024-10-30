@@ -103,7 +103,7 @@ const Home = () => {
     await handleDocumentUpload(meetingId);
 
     websocketRef.current = new WebSocket(
-      `ws://127.0.0.1:8000/api/audio?token=${accessToken}&type=audio&meetingId=${meetingId}`
+      `ws://127.0.0.1:8000/ws/audio/${meetingId}?token=${accessToken}&type=audio&meetingId=${meetingId}`
     );
 
     websocketRef.current.onopen = () => {
