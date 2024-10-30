@@ -137,6 +137,10 @@ const Home = () => {
                 ...output.output.suggestions,
               ],
             }));
+          } else if (output.type === "summary") {
+            console.log('output');
+            console.log(output);
+            // setSummary(output.output);
           }
         }
       } else {
@@ -195,7 +199,17 @@ const Home = () => {
   }, []);
 
   const handleSummary = () => {
-    console.log("api call for summary");
+    if (
+      websocketRef.current &&
+      websocketRef.current.readyState === WebSocket.OPEN
+    ) {
+      const genSummaryMessage = JSON.stringify({
+          type: "generate_summary",
+          meetingId: localStorage.getItem("meetingId"),
+      });
+      websocketRef.current.send(genSummaryMessage);
+      console.log("Generate Summary sent");
+    }
   };
   return (
     <div className={classes.main}>
