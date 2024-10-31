@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import Stepper from "../Stepper";
 import AuthBox from "../AuthBox";
-import { createMeetingApi } from "../../api/meetingApi";
-import classes from "./HeroSection.module.css";
+import { createMeetingApi, joinMeetingApi } from "../../api/meetingApi";
 import toaster from "../Toast/Toast";
+import classes from "./HeroSection.module.css";
+
 
 const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
   const [step, setStep] = useState(1);
@@ -37,7 +38,20 @@ const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
       console.error("Create Meeting Error:", err);
     }
   };
-  const handleJoinMeeting = () => {};
+  const handleJoinMeeting = async () => {
+    try {
+      const result = await joinMeetingApi(meetingId);
+      console.log("result is", result);
+      if (result) {
+        localStorage.setItem("meetingId", meetingId);
+        setIsMeetingJoined(true);
+      }
+      toaster.success(result.message); // Display success message
+    } catch (error) {
+      console.log("error is", error);
+      toaster.error(error); // Display error message if joining fails
+    }
+  };
 
   const handleFileSelect = (files) => {
     setSelectedFiles(files);

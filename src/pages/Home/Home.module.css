@@ -69,18 +69,26 @@
 }
 
 .toggleButton {
-    background-color: black;
-    cursor: pointer;
-    height: 32px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+  background-color: black;
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
 
 @media (max-width: 768px) {
   .box {
     flex-wrap: wrap;
   }
+}
+.chartContent {
+  width: 60%;
+  margin: auto;
+}
+.chartContainer {
+  display: flex;
+  justify-content: center;
 }

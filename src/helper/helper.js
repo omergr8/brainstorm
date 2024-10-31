@@ -15,3 +15,17 @@ export const isValidJSON = (data) => {
     return false;
   }
 };
+
+export const calculateWordCounts = (transcript) => {
+  const wordCounts = {};
+
+  transcript.forEach(({ user, text }) => {
+    const wordCount = text.trim().split(/\s+/).length; // Split text by whitespace to count words
+    wordCounts[user] = (wordCounts[user] || 0) + wordCount;
+  });
+
+  return Object.entries(wordCounts).map(([user, wordCount]) => ({
+    user,
+    wordCount,
+  }));
+};

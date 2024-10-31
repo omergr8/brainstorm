@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { BASE_URL } from '../config/config';
 
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api'; // Use env for the server URL
+const baseURL = BASE_URL // Use env for the server URL
 
 const axiosInstance = axios.create({
   baseURL,

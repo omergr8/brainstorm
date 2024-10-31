@@ -1,7 +1,12 @@
+// React and Core Library Imports
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { loginApi, signupApi, tokenVerifyApi } from '../api/authApi';
+// Routing and Navigation
 import { useNavigate } from 'react-router-dom';
+// API Imports
+import { loginApi, signupApi, tokenVerifyApi } from '../api/authApi';
+// Component Imports
 import toaster from '../components/Toast/Toast';
+
 
 const AuthContext = createContext();
 

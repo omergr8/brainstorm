@@ -1,21 +1,34 @@
+// React and Core Library Imports
 import React, { useEffect, useRef, useState } from "react";
+// Third-party Library Imports
 import { useMicVAD } from "@ricky0123/vad-react";
-import { Button, Divider } from "@mui/material";
-import { Typography } from "@mui/material";
+import { Button, Divider, Typography } from "@mui/material";
+import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
+// Context and Providers
+import { useAuth } from "../../context/AuthContext";
+import withAuth from "../../providers/AuthProvider/withAuth";
+// Component Imports
 import HeroSection from "../../components/HeroSection";
 import LiveTranscript from "../../components/LiveTranscript";
 import Suggestions from "../../components/Suggestions";
 import SessionSummary from "../../components/SessionSummary";
 import Idea from "../../components/Idea";
-import { float32ToPCM } from "../../helper/helper";
-import classes from "./Home.module.css";
 import ActionFooter from "../../components/ActionFooter";
-import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
-import { useAuth } from "../../context/AuthContext";
-import withAuth from "../../providers/AuthProvider/withAuth";
-import { isValidJSON } from "../../helper/helper";
-import { uploadDocumentApi } from "../../api/fileApi";
+import OverlayLoader from "../../components/OverlayLoader";
 import toaster from "../../components/Toast/Toast";
+import IdeaRelationshipChart from "../../components/IdeaRelationshipChart";
+import RecordButton from "../../components/RecordButton";
+// Helper Functions
+import {
+  float32ToPCM,
+  isValidJSON,
+  calculateWordCounts,
+} from "../../helper/helper";
+import WordCountPieChart from "../../components/WordCountPieChart";
+import { uploadDocumentApi } from "../../api/fileApi";
+import { WEBSOCKET_URL } from "../../config/config";
+// Styles
+import classes from "./Home.module.css";
 
 const Home = () => {
   const websocketRef = useRef(null);
@@ -23,10 +36,16 @@ const Home = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [transcription, setTranscription] = useState([]);
   const [analysis, setAnalysis] = useState({ titles: [], suggestions: [] });
-  const [summary, setSummary] = useState("");
+  const [summary, setSummary] = useState([]);
   const [intensity, setIntensity] = useState(0);
   const [hidePlayer, setHidePlayer] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isMeetingEnd, setIsMeetingEnd] = useState(false);
+  const [summaryLoader, setSummaryLoader] = useState(false);
+  const [endLoader, setEndLoader] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+  const [micPermission, setMicPermission] = useState(true);
+  const [wordData, setWordData] = useState([]);
 
   // Set up the VAD
   const vad = useMicVAD({
@@ -41,7 +60,13 @@ const Home = () => {
     },
     onSpeechEnd: (audio) => {
       // Only send audio if connected and VAD is enabled
-      if (isConnected && websocketRef.current) {
+      console.log(websocketRef.current);
+      if (
+        isConnected &&
+        websocketRef.current &&
+        !isMeetingEnd &&
+        micPermission
+      ) {
         const pcmAudioBuffer = float32ToPCM(audio);
 
         // Send the PCM audio buffer to the server
@@ -50,20 +75,25 @@ const Home = () => {
         reader.onload = () => {
           const arrayBuffer = reader.result;
           const base64Data = btoa(
-            new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+            new Uint8Array(arrayBuffer).reduce(
+              (data, byte) => data + String.fromCharCode(byte),
+              ""
+            )
           );
 
-           // Construct the JSON object
+          // Construct the JSON object
           const payload = {
-            meetingId: localStorage.getItem("meetingId"), 
+            meetingId: localStorage.getItem("meetingId"),
             data: base64Data,
-            type: "audio"
+            type: "audio",
           };
 
           // Send the payload as a JSON string
           websocketRef.current.send(JSON.stringify(payload));
         };
         reader.readAsArrayBuffer(blob);
+      } else if (isMeetingEnd) {
+        toaster.error("Meeting has ended.");
       } else {
         toaster.error("WebSocket is not connected.");
         console.log("WebSocket is not connected.");
@@ -74,6 +104,24 @@ const Home = () => {
       console.log("Speech misfire detected (too short)");
     },
   });
+
+  // Effect to manage VAD start/stop based on connection state
+  useEffect(() => {
+    if (isConnected && !isMeetingEnd && micPermission) {
+      vad.start(); // Start VAD if connected
+    } else {
+      vad.pause(); // Stop VAD if not connected
+    }
+  }, [isConnected, vad, isMeetingEnd, micPermission]); // Dependencies to monitor changes
+
+  //Cleanup
+  useEffect(() => {
+    return () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+  }, []);
 
   const handleDocumentUpload = async (id) => {
     if (!selectedFiles[0]) {
@@ -96,6 +144,20 @@ const Home = () => {
     }
   };
 
+  const resetStates = () => {
+    setIsConnected(false);
+    setTranscription([]);
+    setAnalysis({ titles: [], suggestions: [] });
+    setSummary([]);
+    setIntensity(0);
+    setHidePlayer(false);
+    setSelectedFiles([]);
+    setIsMeetingEnd(false);
+    setSummaryLoader(false);
+    setEndLoader(false);
+    setMicPermission(true);
+  };
+
   const handleConnectSession = async () => {
     const accessToken = localStorage.getItem("accessToken");
     const meetingId = localStorage.getItem("meetingId");
@@ -103,7 +165,7 @@ const Home = () => {
     await handleDocumentUpload(meetingId);
 
     websocketRef.current = new WebSocket(
-      `ws://127.0.0.1:8000/ws/audio/${meetingId}?token=${accessToken}&type=audio&meetingId=${meetingId}`
+      `${WEBSOCKET_URL}/ws/audio/${meetingId}?token=${accessToken}&type=audio&meetingId=${meetingId}`
     );
 
     websocketRef.current.onopen = () => {
@@ -118,7 +180,7 @@ const Home = () => {
       // Check if event.data is valid JSON
       if (isValidJSON(event.data)) {
         const output = JSON.parse(event.data);
-        console.log("output:", output);
+        console.log("output is : ", output);
         if (output.msg === "Authentication required: An error occurred.") {
           logout();
         }
@@ -138,13 +200,19 @@ const Home = () => {
               ],
             }));
           } else if (output.type === "summary") {
-            console.log('output');
-            console.log(output);
-            // setSummary(output.output);
+            setSummaryLoader(false);
+            toaster.success("Summary Generated Successfully");
+            setSummary(output.output);
+          } else if (output.type === "end_meeting") {
+            setEndLoader(false);
+            setIsMeetingEnd(true);
+            toaster.success(output.message);
           }
         }
       } else {
         // Handle non-JSON responses, e.g., errors or plain text messages
+        setSummaryLoader(false);
+        setEndLoader(false);
         toaster.error("Received non-JSON message");
         console.log("Received non-JSON message:", event.data);
       }
@@ -153,12 +221,15 @@ const Home = () => {
     websocketRef.current.onerror = (event) => {
       toaster.error("WebSocket error:");
       console.error("WebSocket error:", event);
+      setSummaryLoader(false);
+      setEndLoader(false);
     };
 
     websocketRef.current.onclose = (event) => {
       toaster.info("WebSocket closed:");
-      console.log("WebSocket closed", event);
-      setIsConnected(false); // Update state when closed
+      console.log("WebSocket closeds", event);
+      setResetKey((prevKey) => prevKey + 1);
+      resetStates();
     };
   };
   const disconnectWebSocket = () => {
@@ -171,59 +242,53 @@ const Home = () => {
       websocketRef.current &&
       websocketRef.current.readyState === WebSocket.OPEN
     ) {
-
+      setEndLoader(true);
+      handleSummary();
       const endMeetingMessage = JSON.stringify({
-          type: "end_meeting",
-          meetingId: localStorage.getItem("meetingId"),
+        type: "end_meeting",
+        meetingId: localStorage.getItem("meetingId"),
       });
       websocketRef.current.send(endMeetingMessage);
       console.log("End meeting message sent");
     }
   };
 
-  // Effect to manage VAD start/stop based on connection state
-  useEffect(() => {
-    if (isConnected) {
-      vad.start(); // Start VAD if connected
-    } else {
-      vad.pause(); // Stop VAD if not connected
-    }
-  }, [isConnected, vad]); // Dependencies to monitor changes
-
-  useEffect(() => {
-    return () => {
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
-    };
-  }, []);
-
   const handleSummary = () => {
     if (
       websocketRef.current &&
       websocketRef.current.readyState === WebSocket.OPEN
     ) {
+      setSummaryLoader(true);
       const genSummaryMessage = JSON.stringify({
-          type: "generate_summary",
-          meetingId: localStorage.getItem("meetingId"),
+        type: "generate_summary",
+        meetingId: localStorage.getItem("meetingId"),
       });
       websocketRef.current.send(genSummaryMessage);
       console.log("Generate Summary sent");
     }
   };
+
+  useEffect(() => {
+    if (transcription.length > 0) {
+      const dt = calculateWordCounts(transcription);
+      setWordData(dt);
+    }
+  }, [transcription]);
+
   return (
-    <div className={classes.main}>
+    <div className={classes.main} key={resetKey}>
+      {endLoader && <OverlayLoader />}
       <div className="container">
-        {/* <div className={classes.footer}>
-          <div className={classes.footerContent}>
-            <RecordButton
-              isRecording={isSessionStarted}
-              handleClick={handleRecordClick}
-            />
-          </div>
-        </div> */}
         {isConnected ? (
           <div>
+            <div className={classes.footer}>
+              <div className={classes.footerContent}>
+                <RecordButton
+                  isRecording={micPermission}
+                  handleClick={() => setMicPermission(!micPermission)}
+                />
+              </div>
+            </div>
             <div className={classes.disconnectBox}>
               <Typography
                 variant="h5"
@@ -239,13 +304,13 @@ const Home = () => {
                   ? "User is speaking"
                   : "User is silent"} */}
               </div>
-              <Button
+              {/* <Button
                 variant="contained"
                 color="error"
                 onClick={disconnectWebSocket}
               >
                 End Session
-              </Button>
+              </Button> */}
             </div>
             <Divider />
             {vad.errored && <p>Error: {vad.errored.message}</p>}
@@ -274,16 +339,42 @@ const Home = () => {
             <div className={classes.commonBox}>
               <Idea data={analysis.titles} />
             </div>
+            {analysis.titles.length > 0 && (
+              <div className={classes.chartContainer}>
+                <div className={classes.chartContent}>
+                  <IdeaRelationshipChart data={analysis} />
+                </div>
+              </div>
+            )}
+
             <div className="text-center mt-10 mb-10">
-              <Button onClick={handleSummary} variant="contained">
+              <Button
+                onClick={handleSummary}
+                variant="contained"
+                disabled={isMeetingEnd}
+              >
                 Generate Summary
               </Button>
             </div>
             <div className={classes.commonBox}>
               <div className={classes.SessionSummary}>
-                <SessionSummary data={summary} />
+                <SessionSummary data={summary} loading={summaryLoader} />
               </div>
             </div>
+            {isMeetingEnd && wordData.length > 0 && (
+              <div className={classes.commonBox}>
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ textAlign: "left", fontWeight: "600" }}
+                >
+                  Report
+                </Typography>
+                <div className={classes.chartContent}>
+                  <WordCountPieChart wordData={wordData} />
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <HeroSection
@@ -312,7 +403,11 @@ const Home = () => {
             </div>
           </div>
           <div className={classes.test}>
-            <ActionFooter handleEnd={handleEndMeeting} intensity={intensity} />
+            <ActionFooter
+              handleEnd={handleEndMeeting}
+              isEnd={isMeetingEnd}
+              intensity={intensity}
+            />
           </div>
         </div>
       )}

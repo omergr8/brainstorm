@@ -1,9 +1,14 @@
+// React and Core Library Imports
 import React from "react";
+// Third-party Library Imports
 import { Button } from "@mui/material";
+// Component Imports
 import Waveform from "../Wave";
+// Styles
 import classes from "./ActionFooter.module.css";
 
-const ActionFooter = ({ handleEnd, intensity }) => {
+
+const ActionFooter = ({ handleEnd, intensity, isEnd }) => {
   const meetingId = localStorage.getItem("meetingId");
   return (
     <div className={classes.main}>
@@ -12,11 +17,20 @@ const ActionFooter = ({ handleEnd, intensity }) => {
         <div className={classes.box}>
           <p>Meeting-ID: {meetingId}</p>
           <Waveform intensity={intensity} />
-        <div>
-        <Button variant="contained" color="error" onClick={handleEnd}>
-            End Meeting
-          </Button>
-        </div>
+          <div>
+            {isEnd ? (
+              <p>The meeting has ended</p>
+            ) : (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleEnd}
+                disabled={isEnd}
+              >
+                End Meeting
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

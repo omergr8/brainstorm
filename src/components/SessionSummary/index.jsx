@@ -7,89 +7,107 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import classes from "./SessionSummary.module.css"; // Assuming modular CSS setup
 
-const mockSummaryData = {
-  sessionTitle: "Brainstorming Session: New Features for Product X",
-  keyIdeas: [
-    "Implement dark mode for better user experience",
-    "Allow custom dashboard layouts",
-    "Integrate AI-driven content recommendations",
-  ],
-  decisions: [
-    "Proceed with dark mode implementation in Q1",
-    "Research AI recommendation systems for Q2",
-    "Create mockups for custom dashboard feature",
-  ],
-  actionItems: [
-    "Assign dark mode feature to UX design team",
-    "Schedule a meeting to discuss AI integration feasibility",
-    "Prepare wireframes for custom dashboard layouts",
-  ],
-};
+const SessionSummary = ({ data, loading }) => {
+  const {
+    key_outcomes = [],
+    decisions_made = [],
+    action_items = [],
+    overview = "Session Summary",
+    important_takeaways = [],
+  } = data;
 
-const SessionSummary = ({ data }) => {
-  const { sessionTitle, keyIdeas, decisions, actionItems } = mockSummaryData;
+  // Check if all key arrays and overview are empty
+  const isDataEmpty =
+    !key_outcomes.length &&
+    !decisions_made.length &&
+    !action_items.length &&
+    !important_takeaways.length &&
+    !overview;
 
   return (
     <div className={classes.container}>
       <Typography variant="h5" sx={{ fontWeight: "600" }} gutterBottom>
         Summary
       </Typography>
-      <Card className={classes.card}>
-        <CardContent>
-          {data && data !== "" ? (
-            <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
-              {data}
-            </Typography>
-          ) : (
-            <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
-              Waiting for Summary...
-            </Typography>
-          )}
-          {/* <Typography variant="h5" gutterBottom>
-            {sessionTitle}
-          </Typography>
-          
-          <Typography variant="h6" className={classes.sectionTitle}>
-            Key Ideas
-          </Typography>
-          <List>
-            {keyIdeas.map((idea, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemText primary={idea} />
-              </ListItem>
-            ))}
-          </List>
+      {loading ? (
+       <Box sx={{textAlign:'center'}}>
+         <CircularProgress color="inherit" size="3rem"/>
+       </Box>
+      ) : (
+        <Card
+          className={classes.card}
+          sx={{ background: "rgba(0,0,0,.55) !important" }}
+        >
+          <CardContent>
+            {data.length === 0 ? (
+              <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                Waiting for Summary...
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                  Overview: {overview}
+                </Typography>
 
-          <Divider className={classes.divider} />
+                <Typography variant="h6" className={classes.sectionTitle}>
+                  Key Outcomes
+                </Typography>
+                <List>
+                  {key_outcomes.map((outcome, index) => (
+                    <ListItem key={index} disablePadding>
+                      <ListItemText primary={outcome} />
+                    </ListItem>
+                  ))}
+                </List>
 
-          <Typography variant="h6" className={classes.sectionTitle}>
-            Decisions
-          </Typography>
-          <List>
-            {decisions.map((decision, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemText primary={decision} />
-              </ListItem>
-            ))}
-          </List>
+                <Divider className={classes.divider} />
 
-          <Divider className={classes.divider} />
+                <Typography variant="h6" className={classes.sectionTitle}>
+                  Decisions Made
+                </Typography>
+                <List>
+                  {decisions_made.map((decision, index) => (
+                    <ListItem key={index} disablePadding>
+                      <ListItemText primary={decision} />
+                    </ListItem>
+                  ))}
+                </List>
 
-          <Typography variant="h6" className={classes.sectionTitle}>
-            Action Items
-          </Typography>
-          <List>
-            {actionItems.map((action, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemText primary={action} />
-              </ListItem>
-            ))}
-          </List> */}
-        </CardContent>
-      </Card>
+                <Divider className={classes.divider} />
+
+                <Typography variant="h6" className={classes.sectionTitle}>
+                  Action Items
+                </Typography>
+                <List>
+                  {action_items.map((action, index) => (
+                    <ListItem key={index} disablePadding>
+                      <ListItemText primary={action} />
+                    </ListItem>
+                  ))}
+                </List>
+
+                <Divider className={classes.divider} />
+
+                <Typography variant="h6" className={classes.sectionTitle}>
+                  Important Takeaways
+                </Typography>
+                <List>
+                  {important_takeaways.map((takeaway, index) => (
+                    <ListItem key={index} disablePadding>
+                      <ListItemText primary={takeaway} />
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
