@@ -13,7 +13,7 @@ const OverlayLoader = ({ text }) => {
         {text != null && (
           <div className={`${styles.text}`}>
             <p>[</p>
-            <p>{text}%</p>
+            <p>{text}</p>
             <p>]</p>
           </div>
         )}

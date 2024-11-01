@@ -5,8 +5,13 @@ import { createMeetingApi, joinMeetingApi } from "../../api/meetingApi";
 import toaster from "../Toast/Toast";
 import classes from "./HeroSection.module.css";
 
-
-const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
+const HeroSection = ({
+  handleConnect,
+  selectedFiles,
+  setSelectedFiles,
+  setLoader,
+  setLoadingText,
+}) => {
   const [step, setStep] = useState(1);
   const [meetingId, setMeetingId] = useState("");
   const [isMeetingJoined, setIsMeetingJoined] = useState(false);
@@ -25,6 +30,8 @@ const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
   };
 
   const handleCreateMeeting = async () => {
+    setLoader(true)
+    setLoadingText("Creating meeting, Please wait!")
     try {
       setError(null); // Reset any previous errors
       const response = await createMeetingApi({ title: "New Meeting" });
@@ -36,9 +43,14 @@ const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
     } catch (err) {
       toaster.error("Failed to create the meeting. Please try again.");
       console.error("Create Meeting Error:", err);
+    }finally{
+      setLoader(false)
+      setLoadingText(null)
     }
   };
   const handleJoinMeeting = async () => {
+    setLoader(true)
+    setLoadingText("Joining meeting, Please wait!")
     try {
       const result = await joinMeetingApi(meetingId);
       console.log("result is", result);
@@ -50,6 +62,9 @@ const HeroSection = ({ handleConnect, selectedFiles, setSelectedFiles }) => {
     } catch (error) {
       console.log("error is", error);
       toaster.error(error); // Display error message if joining fails
+    }finally{
+      setLoader(false)
+      setLoadingText(null)
     }
   };
 

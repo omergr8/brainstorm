@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { BASE_URL } from '../config/config';
 
-const baseURL = BASE_URL // Use env for the server URL
+const baseURL = process.env.REACT_APP_BASE_URL // Use env for the server URL
 
 const axiosInstance = axios.create({
   baseURL,

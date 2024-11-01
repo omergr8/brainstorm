@@ -1,70 +1,81 @@
-# Getting Started with Create React App
+# Brainstorm
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Brainstorm is an interactive brainstorming session application built with React. It allows users to engage in collaborative discussions, upload documents, and visualize data through various charts.
 
-## Available Scripts
+## Table of Contents
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running the Project](#running-the-project)
+- [Scripts](#scripts)
+- [Dependencies](#dependencies)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Real-time collaboration with WebSocket support.
+- Document upload capabilities.
+- Visualization of word counts and idea relationships through charts.
+- Detailed summaries and key takeaways generated from the session.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technologies Used
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- React: For building the user interface.
+- Material UI: For responsive design and UI components.
+- Chart.js: For rendering charts and graphs.
+- Axios: For making HTTP requests.
+- React Toastify: For toast notifications.
+- Voice Activity Detection: Using `@ricky0123/vad-react` and `@ricky0123/vad-web` for real-time audio processing.
 
-### `npm test`
+## Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Before you begin, ensure you have the following installed on your machine:
 
-### `npm run build`
+- [Node.js](https://nodejs.org/en/) (v14 or higher)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository to your local machine:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   git clone https://github.com/omergr8/brainstorm.git
+   cd brainstorm
 
-### `npm run eject`
+2. npm install.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Configuration
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Before running the project, set up your environment variables. Create a .env file in the root directory and add the following lines:
+REACT_APP_WEBSOCKET_URL="websocket_URL"
+REACT_APP_BASE_URL="server_base_URL"
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Running the Project
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+npm start
 
-## Learn More
+## Scripts
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The following scripts are available for managing the project:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+start: Runs the app in development mode.
+build: Builds the app for production to the build folder.
+test: Runs the test suite.
+eject: Removes the single build dependency from your project (use with caution).
 
-### Code Splitting
+## Dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+This project is built using the following key dependencies:
 
-### Analyzing the Bundle Size
+@mui/material and @mui/icons-material: Material UI for styling and components.
+react-chartjs-2 and chart.js: For data visualization with charts.
+axios: For making HTTP requests.
+react-toastify: For displaying toast notifications.
+@ricky0123/vad-react and @ricky0123/vad-web: For voice activity detection.
+For a complete list of dependencies, refer to the package.json file.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-### Advanced Configuration
+  
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

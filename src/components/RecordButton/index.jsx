@@ -11,9 +11,9 @@ const RecordButton = ({ isRecording, handleClick }) => {
         onClick={handleClick}
       >
         {isRecording ? (
-          <MicOffIcon className={classes.icon} />
-        ) : (
           <MicIcon className={classes.icon} />
+        ) : (
+          <MicOffIcon className={classes.icon} />
         )}
       </div>
       <p className="text-center">{isRecording ? "Mic On" : "Mic Off"}</p>

@@ -21,33 +21,46 @@ import RecordButton from "../../components/RecordButton";
 // Helper Functions
 import {
   float32ToPCM,
-  isValidJSON,
   calculateWordCounts,
 } from "../../helper/helper";
+import { connectWebSocket, handleMessage } from "../../helper/websocketHelpers";
 import WordCountPieChart from "../../components/WordCountPieChart";
+import KeyOutcomesChart from "../../components/KeyOutcomesChart";
+import DecisionsMadeChart from "../../components/DecisionsMadeChart";
 import { uploadDocumentApi } from "../../api/fileApi";
-import { WEBSOCKET_URL } from "../../config/config";
 // Styles
 import classes from "./Home.module.css";
 
 const Home = () => {
+  // References
   const websocketRef = useRef(null);
+
+  // Hooks
   const { logout } = useAuth();
+
+  // Connection States
   const [isConnected, setIsConnected] = useState(false);
+  const [isMeetingEnd, setIsMeetingEnd] = useState(false);
+
+  // Transcription & Analysis States
   const [transcription, setTranscription] = useState([]);
   const [analysis, setAnalysis] = useState({ titles: [], suggestions: [] });
   const [summary, setSummary] = useState([]);
-  const [intensity, setIntensity] = useState(0);
+  const [wordData, setWordData] = useState([]);
+
+  // UI States
   const [hidePlayer, setHidePlayer] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [isMeetingEnd, setIsMeetingEnd] = useState(false);
+  const [loadinText, setLoadingText] = useState(null);
   const [summaryLoader, setSummaryLoader] = useState(false);
   const [endLoader, setEndLoader] = useState(false);
   const [resetKey, setResetKey] = useState(0);
-  const [micPermission, setMicPermission] = useState(true);
-  const [wordData, setWordData] = useState([]);
 
-  // Set up the VAD
+  // Audio & Interaction States
+  const [micPermission, setMicPermission] = useState(true);
+  const [intensity, setIntensity] = useState(0);
+
+  // Set up the Voice Activity Detection (VAD)
   const vad = useMicVAD({
     startOnLoad: false, // Disable automatic start
     onSpeechStart: () => {
@@ -114,7 +127,7 @@ const Home = () => {
     }
   }, [isConnected, vad, isMeetingEnd, micPermission]); // Dependencies to monitor changes
 
-  //Cleanup
+  // Cleanup effect to close WebSocket connection on component unmount
   useEffect(() => {
     return () => {
       if (websocketRef.current) {
@@ -123,6 +136,7 @@ const Home = () => {
     };
   }, []);
 
+  // Function to handle document upload
   const handleDocumentUpload = async (id) => {
     if (!selectedFiles[0]) {
       toaster.error("Please select a file first.");
@@ -134,6 +148,8 @@ const Home = () => {
       console.log("no meeting id is detected");
       return;
     }
+    setEndLoader(true);
+    setLoadingText("Uploading File, Please wait!");
     try {
       const responseMessage = await uploadDocumentApi(selectedFiles[0], id);
       toaster.success(responseMessage);
@@ -141,9 +157,13 @@ const Home = () => {
     } catch (error) {
       toaster.error(`Error: ${error}`);
       console.log(`Error: ${error}`); // Display error message
+    } finally {
+      setEndLoader(false);
+      setLoadingText(null);
     }
   };
 
+  // Function to reset application states
   const resetStates = () => {
     setIsConnected(false);
     setTranscription([]);
@@ -158,91 +178,73 @@ const Home = () => {
     setMicPermission(true);
   };
 
+  // Function to handle connecting to the session
   const handleConnectSession = async () => {
     const accessToken = localStorage.getItem("accessToken");
     const meetingId = localStorage.getItem("meetingId");
 
     await handleDocumentUpload(meetingId);
+    setEndLoader(true);
+    setLoadingText("Connecting...");
 
-    websocketRef.current = new WebSocket(
-      `${WEBSOCKET_URL}/ws/audio/${meetingId}?token=${accessToken}&type=audio&meetingId=${meetingId}`
-    );
-
-    websocketRef.current.onopen = () => {
+    const onOpen = () => {
       toaster.success("WebSocket connected");
       console.log("WebSocket connected");
-      setIsConnected(true); // Update state to indicate connection
+      setEndLoader(false);
+      setIsConnected(true);
     };
 
-    websocketRef.current.onmessage = (event) => {
-      console.log(event, event.data);
-
-      // Check if event.data is valid JSON
-      if (isValidJSON(event.data)) {
-        const output = JSON.parse(event.data);
-        console.log("output is : ", output);
-        if (output.msg === "Authentication required: An error occurred.") {
-          logout();
-        }
-
-        if (output && output.status === "success") {
-          if (output.type === "transcription") {
-            setTranscription((prev) => [
-              ...prev,
-              { text: output.text, user: output.user },
-            ]);
-          } else if (output.type === "analysis" && output.output) {
-            setAnalysis((prevAnalysis) => ({
-              titles: [...prevAnalysis.titles, ...output.output.titles],
-              suggestions: [
-                ...prevAnalysis.suggestions,
-                ...output.output.suggestions,
-              ],
-            }));
-          } else if (output.type === "summary") {
-            setSummaryLoader(false);
-            toaster.success("Summary Generated Successfully");
-            setSummary(output.output);
-          } else if (output.type === "end_meeting") {
-            setEndLoader(false);
-            setIsMeetingEnd(true);
-            toaster.success(output.message);
-          }
-        }
-      } else {
-        // Handle non-JSON responses, e.g., errors or plain text messages
-        setSummaryLoader(false);
-        setEndLoader(false);
-        toaster.error("Received non-JSON message");
-        console.log("Received non-JSON message:", event.data);
-      }
+    const onMessage = (event) => {
+      handleMessage(
+        event,
+        setTranscription,
+        setAnalysis,
+        setSummary,
+        setSummaryLoader,
+        setEndLoader,
+        logout,
+        setIsMeetingEnd
+      );
     };
 
-    websocketRef.current.onerror = (event) => {
+    const onError = (event) => {
       toaster.error("WebSocket error:");
       console.error("WebSocket error:", event);
       setSummaryLoader(false);
       setEndLoader(false);
     };
 
-    websocketRef.current.onclose = (event) => {
+    const onClose = (event) => {
       toaster.info("WebSocket closed:");
-      console.log("WebSocket closeds", event);
+      console.log("WebSocket closed", event);
       setResetKey((prevKey) => prevKey + 1);
       resetStates();
     };
+
+    websocketRef.current = connectWebSocket(
+      meetingId,
+      accessToken,
+      onOpen,
+      onMessage,
+      onError,
+      onClose
+    );
   };
+
   const disconnectWebSocket = () => {
     if (websocketRef.current) {
       websocketRef.current.close(); // Close WebSocket connection
     }
   };
+
+  // Function to handle EndMeeting
   const handleEndMeeting = () => {
     if (
       websocketRef.current &&
       websocketRef.current.readyState === WebSocket.OPEN
     ) {
       setEndLoader(true);
+      setLoadingText("Creating Summary");
       handleSummary();
       const endMeetingMessage = JSON.stringify({
         type: "end_meeting",
@@ -253,6 +255,7 @@ const Home = () => {
     }
   };
 
+  // Function to generate summary
   const handleSummary = () => {
     if (
       websocketRef.current &&
@@ -277,7 +280,7 @@ const Home = () => {
 
   return (
     <div className={classes.main} key={resetKey}>
-      {endLoader && <OverlayLoader />}
+      {endLoader && <OverlayLoader text={loadinText} />}
       <div className="container">
         {isConnected ? (
           <div>
@@ -297,20 +300,7 @@ const Home = () => {
               >
                 Session Dashboard
               </Typography>
-              <div>
-                {/* {vad.loading
-                  ? "Loading..."
-                  : vad.userSpeaking
-                  ? "User is speaking"
-                  : "User is silent"} */}
-              </div>
-              {/* <Button
-                variant="contained"
-                color="error"
-                onClick={disconnectWebSocket}
-              >
-                End Session
-              </Button> */}
+              <div></div>
             </div>
             <Divider />
             {vad.errored && <p>Error: {vad.errored.message}</p>}
@@ -370,9 +360,27 @@ const Home = () => {
                 >
                   Report
                 </Typography>
-                <div className={classes.chartContent}>
-                  <WordCountPieChart wordData={wordData} />
+                <div className={classes.chartBox}>
+                  <div className={classes.chartContent}>
+                    <WordCountPieChart wordData={wordData} />
+                  </div>
+                  {summary && summary.key_outcomes && summary.action_items && (
+                    <div className={classes.chartContent}>
+                      <KeyOutcomesChart
+                        keyOutcomes={summary.key_outcomes}
+                        actionItems={summary.action_items}
+                      />
+                    </div>
+                  )}
                 </div>
+
+                {summary && summary.decisions_made && (
+                  <div className={classes.chartContent}>
+                    <DecisionsMadeChart
+                      decisionsMade={summary.decisions_made}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -381,6 +389,8 @@ const Home = () => {
             handleConnect={handleConnectSession}
             selectedFiles={selectedFiles}
             setSelectedFiles={setSelectedFiles}
+            setLoader={setEndLoader}
+            setLoadingText={setLoadingText}
           />
         )}
       </div>

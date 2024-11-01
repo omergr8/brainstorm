@@ -1,7 +1,7 @@
 .recordButton {
   width: 60px;
   height: 60px;
-  background-color: #1876d1;
+  background-color: #f44336;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -11,7 +11,7 @@
 }
 
 .recording {
-  background-color: #f44336;
+  background-color: #1876d1;
   width: 60px;
   height: 60px;
   border-radius: 50%;
