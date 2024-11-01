@@ -47,31 +47,31 @@ Before you begin, ensure you have the following installed on your machine:
 ## Configuration
 
 Before running the project, set up your environment variables. Create a .env file in the root directory and add the following lines:
-REACT_APP_WEBSOCKET_URL="websocket_URL"
-REACT_APP_BASE_URL="server_base_URL"
+- REACT_APP_WEBSOCKET_URL="websocket_URL"
+- REACT_APP_BASE_URL="server_base_URL"
 
 ## Running the Project
 
-npm start
+- npm start
 
 ## Scripts
 
 The following scripts are available for managing the project:
 
-start: Runs the app in development mode.
-build: Builds the app for production to the build folder.
-test: Runs the test suite.
-eject: Removes the single build dependency from your project (use with caution).
+- start: Runs the app in development mode.
+- build: Builds the app for production to the build folder.
+- test: Runs the test suite.
+- eject: Removes the single build dependency from your project (use with caution).
 
 ## Dependencies
 
 This project is built using the following key dependencies:
 
-@mui/material and @mui/icons-material: Material UI for styling and components.
-react-chartjs-2 and chart.js: For data visualization with charts.
-axios: For making HTTP requests.
-react-toastify: For displaying toast notifications.
-@ricky0123/vad-react and @ricky0123/vad-web: For voice activity detection.
+- @mui/material and @mui/icons-material: Material UI for styling and components.
+- react-chartjs-2 and chart.js: For data visualization with charts.
+- axios: For making HTTP requests.
+- react-toastify: For displaying toast notifications.
+- @ricky0123/vad-react and @ricky0123/vad-web: For voice activity detection.
 For a complete list of dependencies, refer to the package.json file.
 
 
