@@ -38,6 +38,7 @@ const HeroSection = ({
       setIsMeetingJoined(true);
       setMeetingId(response.meetingId); // Assuming the response contains `meetingId`
       localStorage.setItem("meetingId", response.meetingId);
+      setStep(2)
       toaster.success(`Meeting created successfully: ${response.meetingId}`);
       console.log(`Meeting created successfully: ${response.meetingId}`);
     } catch (err) {
@@ -57,6 +58,7 @@ const HeroSection = ({
       if (result) {
         localStorage.setItem("meetingId", meetingId);
         setIsMeetingJoined(true);
+        setStep(2)
       }
       toaster.success(result.message); // Display success message
     } catch (error) {

@@ -20,3 +20,13 @@ export const joinMeetingApi = async (meetingId) => {
     throw error.response?.data?.detail || "Failed to join meeting";
   }
 };
+
+export const getMeetingApi = async (meetingId) => {
+  try {
+    const response = await axiosInstance.get(`/meeting/${meetingId}`);
+    return response.data; // returns meeting details including participants
+  } catch (error) {
+    console.error("Error fetching meeting details:", error);
+    throw error.response?.data?.detail || "Failed to fetch meeting details";
+  }
+};

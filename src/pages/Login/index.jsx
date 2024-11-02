@@ -6,7 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import Link from "@mui/material/Link";
+import { Link } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -16,6 +16,7 @@ import ForgotPassword from "../../components/ForgotPassword";
 import AppTheme from "../../theme/AppTheme";
 import { useAuth } from "../../context/AuthContext";
 import RedirectIfAuthenticated from "../../providers/AuthProvider/RedirectIfAuthenticated";
+import { routes } from "../../config/routes";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -166,15 +167,6 @@ const SignIn =(props)=> {
             <FormControl>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <FormLabel htmlFor="password">Password</FormLabel>
-                <Link
-                  component="button"
-                  type="button"
-                  onClick={handleClickOpen}
-                  variant="body2"
-                  sx={{ alignSelf: "baseline" }}
-                >
-                  Forgot your password?
-                </Link>
               </Box>
               <TextField
                 error={passwordError}
@@ -208,9 +200,8 @@ const SignIn =(props)=> {
               Don&apos;t have an account?{" "}
               <span>
                 <Link
-                  href="/material-ui/getting-started/templates/sign-in/"
-                  variant="body2"
-                  sx={{ alignSelf: "center" }}
+                  to={routes.account.signup}
+                  styles={{ alignSelf: "center", color:'black !important' }}
                 >
                   Sign up
                 </Link>
