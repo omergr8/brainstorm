@@ -102,6 +102,7 @@ const HeroSection = ({
           selectedFiles={selectedFiles}
           meetingId={meetingId}
           setMeetingId={setMeetingId}
+          isMeetingJoined={isMeetingJoined}
         />
       </AuthBox>
     </div>

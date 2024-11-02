@@ -9,6 +9,7 @@ const Meeting = ({
   handleJoinMeeting,
   meetingId,
   setMeetingId,
+  isMeetingJoined,
 }) => {
   return (
     <div className={classes.meetingMain}>
@@ -26,14 +27,19 @@ const Meeting = ({
           onChange={(e) => setMeetingId(e.target.value)}
           lineColor="green"
         />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleJoinMeeting}
-        >
-          Join
-        </Button>
+        {isMeetingJoined ? (
+          <p>Joined</p>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={handleJoinMeeting}
+            disabled={isMeetingJoined}
+          >
+            Join
+          </Button>
+        )}
       </div>
       <div className={classes.nextContainer}>
         <Button

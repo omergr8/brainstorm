@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 import styles from "./DragAndDrop.module.css";
 
 const DragAndDrop = ({
@@ -57,6 +58,11 @@ const DragAndDrop = ({
     setDragging(false);
   };
 
+  const removeFile = (fileToRemove) => {
+    const updatedFiles = selectedFiles.filter((file) => file !== fileToRemove);
+    onFileSelect(updatedFiles);
+  };
+
   return (
     <div>
       <div
@@ -76,15 +82,21 @@ const DragAndDrop = ({
           onChange={handleChange}
         />
         <div className={styles.content}>
-          <p >
+          <p>
             Drag PDF files here or <span>Click to browse</span>
           </p>
+          <p className={styles.helperText}>Only one file supported</p>
           {selectedFiles &&
             selectedFiles.length > 0 &&
             selectedFiles.map((file, index) => (
-              <li key={index}>
+              <div key={index} className={styles.fileItem}>
                 {file.name} - {(file.size / (1024 * 1024)).toFixed(2)} MB
-              </li>
+                <CloseIcon
+                  onClick={() => removeFile(file)}
+                  sx={{ color: "red" }}
+                  className={styles.removeButton}
+                />
+              </div>
             ))}
         </div>
         {error && <p className={styles.errorText}>{error}</p>}

@@ -19,10 +19,7 @@ import toaster from "../../components/Toast/Toast";
 import IdeaRelationshipChart from "../../components/IdeaRelationshipChart";
 import RecordButton from "../../components/RecordButton";
 // Helper Functions
-import {
-  float32ToPCM,
-  calculateWordCounts,
-} from "../../helper/helper";
+import { float32ToPCM, calculateWordCounts } from "../../helper/helper";
 import { connectWebSocket, handleMessage } from "../../helper/websocketHelpers";
 import WordCountPieChart from "../../components/WordCountPieChart";
 import KeyOutcomesChart from "../../components/KeyOutcomesChart";

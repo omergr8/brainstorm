@@ -46,4 +46,11 @@
     font-weight: 400;
     margin: 0;
   }
-  
+  .helperText{
+    font-size: 10px !important;
+    font-style: italic;
+  }
+  .fileItem{
+    display: flex;
+    align-items: center;
+  }

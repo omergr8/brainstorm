@@ -15,6 +15,7 @@ const Stepper = ({
   handleJoinMeeting,
   meetingId,
   setMeetingId,
+  isMeetingJoined,
 }) => {
   return (
     <>
@@ -28,6 +29,7 @@ const Stepper = ({
                 handleJoinMeeting={handleJoinMeeting}
                 meetingId={meetingId}
                 setMeetingId={setMeetingId}
+                isMeetingJoined={isMeetingJoined}
               />
             );
           case 2:
